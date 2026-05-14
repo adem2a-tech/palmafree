@@ -11,10 +11,11 @@ router.post("/admin/login", async (req, res): Promise<void> => {
   }
 
   const { username, password } = parsed.data;
-  const adminUser = process.env.ADMIN_USERNAME || "admin";
-  const adminPass = process.env.ADMIN_PASSWORD || "admin";
+  const adminPass = (process.env.ADMIN_PASSWORD || "admin").trim();
 
-  if (username === adminUser && password === adminPass) {
+  req.log.info({ usernameMatch: username === "admin", passLen: adminPass.length }, "Login attempt");
+
+  if (username === "admin" && password.trim() === adminPass) {
     (req.session as any).isAdmin = true;
     res.sendStatus(200);
   } else {
