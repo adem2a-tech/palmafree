@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { cp, rm } from "node:fs/promises";
 
 globalThis.require = createRequire(import.meta.url);
 
@@ -154,6 +154,12 @@ async function buildAll() {
     plugins: pinoPlugins,
     banner: esmBanner,
   });
+
+  // 3) Copie à côté de api/index.mjs : Vercel inclut mal les imports ../artifacts depuis api/.
+  const repoRoot = path.resolve(artifactDir, "../..");
+  const apiVercelBundle = path.join(repoRoot, "api", "vercel-bundle");
+  await rm(apiVercelBundle, { recursive: true, force: true });
+  await cp(vercelBundleDir, apiVercelBundle, { recursive: true });
 }
 
 buildAll().catch((err) => {

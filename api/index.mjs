@@ -1,6 +1,6 @@
 /**
- * Vercel Serverless : charge uniquement le bundle esbuild (monorepo + deps résolus au build).
+ * Vercel Serverless : le build copie le bundle dans ./vercel-bundle/ (import fiable, sans ../artifacts).
  */
-import handler from "../artifacts/api-server/dist/vercel-bundle/vercel-handler.mjs";
+import handler from "./vercel-bundle/vercel-handler.mjs";
 
 export default handler;

@@ -1,10 +1,8 @@
 /**
- * Entrée Serverless (Vercel) : pas de `listen()`, tout est dans le bundle esbuild.
+ * Entrée Serverless (Vercel) : pas de `listen()`, bundle esbuild copié dans `api/vercel-bundle/`.
  *
- * Ne pas importer `./app` tant que `DATABASE_URL` est absent : `app` charge `@workspace/db`
- * qui throw au chargement → cold start Vercel en 500 FUNCTION_INVOCATION_FAILED sans corps utile.
- *
- * Toute erreur au `import("./app")` est capturée (pino-pretty manquant, module, etc.).
+ * - Pas de top-level await (meilleure compat runtime Vercel).
+ * - `import("./app")` seulement au premier appel : évite throw @workspace/db si pas de DATABASE_URL.
  */
 import type { Express } from "express";
 import express from "express";
@@ -21,20 +19,36 @@ function misconfiguredApp(detail: string): Express {
   return app;
 }
 
-let app: Express;
-if (!process.env.DATABASE_URL) {
-  app = misconfiguredApp(
-    "DATABASE_URL n'est pas définie. Vercel → Project → Settings → Environment Variables.",
-  );
-} else {
-  try {
-    app = (await import("./app")).default;
-  } catch (err) {
-    console.error("[vercel-handler] échec chargement ./app", err);
-    app = misconfiguredApp(
-      "L'API n'a pas pu démarrer (voir logs Vercel). Vérifiez DATABASE_URL, SSL Postgres, et que le build api-server a réussi.",
-    );
+let handlerPromise: Promise<ReturnType<typeof serverless>> | undefined;
+
+function loadHandler(): Promise<ReturnType<typeof serverless>> {
+  if (!handlerPromise) {
+    handlerPromise = (async () => {
+      let app: Express;
+      if (!process.env.DATABASE_URL) {
+        app = misconfiguredApp(
+          "DATABASE_URL n'est pas définie. Vercel → Project → Settings → Environment Variables.",
+        );
+      } else {
+        try {
+          app = (await import("./app")).default;
+        } catch (err) {
+          console.error("[vercel-handler] échec chargement ./app", err);
+          app = misconfiguredApp(
+            "L'API n'a pas pu démarrer (voir logs Vercel). Vérifiez DATABASE_URL, SSL Postgres, et que le build api-server a réussi.",
+          );
+        }
+      }
+      return serverless(app);
+    })();
   }
+  return handlerPromise;
 }
 
-export default serverless(app);
+export default async function vercelHandler(
+  req: Parameters<ReturnType<typeof serverless>>[0],
+  res: Parameters<ReturnType<typeof serverless>>[1],
+) {
+  const handler = await loadHandler();
+  return handler(req, res);
+}
