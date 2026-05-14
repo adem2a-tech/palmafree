@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm run build && cross-env NODE_ENV=development node --enable-source-maps ./dist/index.mjs",
-    "build": "tsc -p tsconfig.json && node build.mjs",
+    "build": "node build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
