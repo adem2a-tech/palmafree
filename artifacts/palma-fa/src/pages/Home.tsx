@@ -72,6 +72,14 @@ export default function Home() {
           </div>
           
           <div className="container relative z-10 mx-auto px-4 md:px-6 flex flex-col items-center text-center">
+            <motion.img
+              src="/palmier.png"
+              alt="Palmier Palma FA"
+              className="w-48 md:w-64 lg:w-72 object-contain drop-shadow-[0_0_40px_rgba(74,222,128,0.5)] mb-2"
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: [0, -14, 0] }}
+              transition={{ opacity: { duration: 0.8 }, y: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 } }}
+            />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
