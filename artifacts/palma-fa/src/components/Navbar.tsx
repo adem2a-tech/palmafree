@@ -3,15 +3,18 @@ import { Link } from "wouter";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const NavLinks = [
-  { name: "Accueil", href: "#home" },
-  { name: "Nouveautés", href: "#patch-notes" },
-  { name: "Lore", href: "#lore" },
-  { name: "Métiers", href: "#jobs" },
-  { name: "Illégal", href: "#illegal" },
-  { name: "Équipe", href: "#staff" },
-  { name: "Réseaux", href: "#socials" },
-  { name: "Fonctionnalités", href: "#features" },
+const NavLinks: ReadonlyArray<
+  | { name: string; type: "hash"; href: string }
+  | { name: string; type: "route"; href: string }
+> = [
+  { name: "Accueil", type: "hash", href: "#home" },
+  { name: "Nouveautés", type: "hash", href: "#patch-notes" },
+  { name: "Lore", type: "hash", href: "#lore" },
+  { name: "Métiers", type: "hash", href: "#jobs" },
+  { name: "Illégal", type: "hash", href: "#illegal" },
+  { name: "Équipe", type: "hash", href: "#staff" },
+  { name: "Réseaux", type: "hash", href: "#socials" },
+  { name: "Admin", type: "route", href: "/admin" },
 ];
 
 export function Navbar() {
@@ -59,17 +62,27 @@ export function Navbar() {
           </a>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-6">
-            {NavLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleScrollTo(e, link.href)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-6 flex-wrap justify-end">
+            {NavLinks.map((link) =>
+              link.type === "hash" ? (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleScrollTo(e, link.href)}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ),
+            )}
           </nav>
 
           {/* Actions */}
@@ -78,7 +91,7 @@ export function Navbar() {
               Wiki
             </a>
             <a
-              href="https://discord.gg/palmafa"
+              href="https://discord.gg/rxvfFQvxV"
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-md bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold text-sm hover:shadow-[0_0_20px_rgba(253,224,71,0.3)] transition-all transform hover:-translate-y-0.5"
@@ -107,22 +120,33 @@ export function Navbar() {
             className="lg:hidden bg-background/95 backdrop-blur-lg border-b border-border overflow-hidden"
           >
             <div className="flex flex-col py-4 px-6 gap-4">
-              {NavLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleScrollTo(e, link.href)}
-                  className="text-base font-medium text-foreground hover:text-primary"
-                >
-                  {link.name}
-                </a>
-              ))}
+              {NavLinks.map((link) =>
+                link.type === "hash" ? (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={(e) => handleScrollTo(e, link.href)}
+                    className="text-base font-medium text-foreground hover:text-primary"
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-base font-medium text-foreground hover:text-primary"
+                  >
+                    {link.name}
+                  </Link>
+                ),
+              )}
               <div className="h-px bg-border my-2" />
               <a href="https://wiki.palma-fa.fr" className="text-base font-medium text-foreground hover:text-primary">
                 Wiki
               </a>
               <a
-                href="https://discord.gg/palmafa"
+                href="https://discord.gg/rxvfFQvxV"
                 className="w-full text-center px-5 py-3 rounded-md bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold"
               >
                 Rejoindre Discord

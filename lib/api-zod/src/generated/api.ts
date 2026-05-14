@@ -23,6 +23,7 @@ export const ListJobsResponseItem = zod.object({
   category: zod.string(),
   available: zod.boolean(),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
 });
 export const ListJobsResponse = zod.array(ListJobsResponseItem);
 
@@ -35,6 +36,8 @@ export const ListIllegalOrgsResponseItem = zod.object({
   status: zod.string(),
   activities: zod.array(zod.string()),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+  segment: zod.string(),
 });
 export const ListIllegalOrgsResponse = zod.array(ListIllegalOrgsResponseItem);
 
@@ -53,11 +56,125 @@ export const ListStaffResponseItem = zod.object({
 export const ListStaffResponse = zod.array(ListStaffResponseItem);
 
 /**
+ * @summary List lore entries
+ */
+export const ListLoreResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  summary: zod.string(),
+  sortOrder: zod.number(),
+  imageUrl: zod.string().nullish(),
+});
+export const ListLoreResponse = zod.array(ListLoreResponseItem);
+
+/**
+ * @summary List patch notes (nouveautés)
+ */
+export const ListPatchNotesResponseItem = zod.object({
+  id: zod.number(),
+  version: zod.string(),
+  date: zod.string(),
+  category: zod.string(),
+  changes: zod.array(zod.string()),
+  sortOrder: zod.number(),
+});
+export const ListPatchNotesResponse = zod.array(ListPatchNotesResponseItem);
+
+/**
+ * @summary List gallery items (images + descriptions)
+ */
+export const ListGalleryResponseItem = zod.object({
+  id: zod.number(),
+  imageUrl: zod.string(),
+  description: zod.string(),
+  sortOrder: zod.number(),
+});
+export const ListGalleryResponse = zod.array(ListGalleryResponseItem);
+
+/**
+ * @summary Create a gallery item
+ */
+export const CreateGalleryItemBody = zod.object({
+  imageUrl: zod.string(),
+  description: zod.string(),
+  sortOrder: zod.number().optional(),
+});
+
+/**
+ * @summary Update a gallery item
+ */
+export const UpdateGalleryItemParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateGalleryItemBody = zod.object({
+  imageUrl: zod.string().optional(),
+  description: zod.string().optional(),
+  sortOrder: zod.number().optional(),
+});
+
+export const UpdateGalleryItemResponse = zod.object({
+  id: zod.number(),
+  imageUrl: zod.string(),
+  description: zod.string(),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a gallery item
+ */
+export const DeleteGalleryItemParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Create a patch note
+ */
+export const CreatePatchNoteBody = zod.object({
+  version: zod.string(),
+  date: zod.string(),
+  category: zod.string(),
+  changes: zod.array(zod.string()),
+  sortOrder: zod.number().optional(),
+});
+
+/**
+ * @summary Update a patch note
+ */
+export const UpdatePatchNoteParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdatePatchNoteBody = zod.object({
+  version: zod.string().optional(),
+  date: zod.string().optional(),
+  category: zod.string().optional(),
+  changes: zod.array(zod.string()).optional(),
+  sortOrder: zod.number().optional(),
+});
+
+export const UpdatePatchNoteResponse = zod.object({
+  id: zod.number(),
+  version: zod.string(),
+  date: zod.string(),
+  category: zod.string(),
+  changes: zod.array(zod.string()),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a patch note
+ */
+export const DeletePatchNoteParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({
   username: zod.string(),
-  password: zod.string(),
+  password: zod.string().optional(),
 });
 
 /**
@@ -68,6 +185,17 @@ export const AdminMeResponse = zod.object({
 });
 
 /**
+ * @summary Create a job
+ */
+export const CreateJobBody = zod.object({
+  name: zod.string(),
+  category: zod.string(),
+  available: zod.boolean().optional(),
+  discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+});
+
+/**
  * @summary Update a job
  */
 export const UpdateJobParams = zod.object({
@@ -75,8 +203,11 @@ export const UpdateJobParams = zod.object({
 });
 
 export const UpdateJobBody = zod.object({
+  name: zod.string().optional(),
+  category: zod.string().optional(),
   available: zod.boolean().optional(),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
 });
 
 export const UpdateJobResponse = zod.object({
@@ -85,6 +216,26 @@ export const UpdateJobResponse = zod.object({
   category: zod.string(),
   available: zod.boolean(),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Delete a job
+ */
+export const DeleteJobParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Create an illegal organization
+ */
+export const CreateIllegalOrgBody = zod.object({
+  name: zod.string(),
+  status: zod.string(),
+  activities: zod.array(zod.string()),
+  discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+  segment: zod.string().optional(),
 });
 
 /**
@@ -95,8 +246,12 @@ export const UpdateIllegalOrgParams = zod.object({
 });
 
 export const UpdateIllegalOrgBody = zod.object({
+  name: zod.string().optional(),
   status: zod.string().optional(),
+  activities: zod.array(zod.string()).optional(),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+  segment: zod.string().optional(),
 });
 
 export const UpdateIllegalOrgResponse = zod.object({
@@ -105,6 +260,54 @@ export const UpdateIllegalOrgResponse = zod.object({
   status: zod.string(),
   activities: zod.array(zod.string()),
   discordLink: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+  segment: zod.string(),
+});
+
+/**
+ * @summary Delete an illegal organization
+ */
+export const DeleteIllegalOrgParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Create a lore entry
+ */
+export const CreateLoreBody = zod.object({
+  title: zod.string(),
+  summary: zod.string(),
+  sortOrder: zod.number().optional(),
+  imageUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Update a lore entry
+ */
+export const UpdateLoreParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateLoreBody = zod.object({
+  title: zod.string().optional(),
+  summary: zod.string().optional(),
+  sortOrder: zod.number().optional(),
+  imageUrl: zod.string().nullish(),
+});
+
+export const UpdateLoreResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  summary: zod.string(),
+  sortOrder: zod.number(),
+  imageUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Delete a lore entry
+ */
+export const DeleteLoreParams = zod.object({
+  id: zod.coerce.number(),
 });
 
 /**

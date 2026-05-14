@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
-import { Copy, Check, ChevronRight, Play, Server, Skull, Users, Shield, MapPin, DollarSign, Briefcase, Hammer, Pill, Crosshair, Vault, Car, Home as HomeIcon, Scale, Smartphone, Monitor } from "lucide-react";
+import {
+  Copy,
+  Check,
+  ChevronRight,
+  MapPin,
+  Skull,
+  Shield,
+  DollarSign,
+  Briefcase,
+  Hammer,
+  Pill,
+  Crosshair,
+  Vault,
+  Car,
+  Home as HomeIcon,
+  Scale,
+  Smartphone,
+  Monitor,
+  Calendar,
+  Wrench,
+  Info,
+  BookOpen,
+  Image as ImageIcon,
+} from "lucide-react";
 import { SiDiscord, SiTiktok, SiYoutube, SiInstagram, SiX, SiTwitch } from "react-icons/si";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { PATCH_NOTES, LORE, FEATURES } from "@/data";
+import { FEATURES } from "@/data";
 import { useToast } from "@/hooks/use-toast";
-import { useListJobs, useListIllegalOrgs, useListStaff } from "@workspace/api-client-react";
+import {
+  useListJobs,
+  useListIllegalOrgs,
+  useListStaff,
+  useListLore,
+  useListPatchNotes,
+  useListGallery,
+  type Job,
+} from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import palmaPTabLogo from "@/assets/palma-p-tab.png";
 
 const iconMap: Record<string, React.ReactNode> = {
   DollarSign: <DollarSign className="text-primary w-8 h-8" />,
@@ -29,6 +61,41 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
+function IllegalOrgCardBanner({ imageUrl }: { imageUrl: string | null | undefined }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const url = imageUrl?.trim() ?? "";
+  const showRemote = Boolean(url) && !imgFailed;
+
+  useEffect(() => {
+    setImgFailed(false);
+  }, [url]);
+
+  return (
+    <div className="relative aspect-[2/1] w-full shrink-0 bg-black">
+      {showRemote ? (
+        <img
+          src={url}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-black">
+          <img
+            src={palmaPTabLogo}
+            alt=""
+            width={80}
+            height={80}
+            className="h-[72px] w-[72px] object-contain opacity-95 drop-shadow-[0_0_24px_rgba(74,222,128,0.25)] md:h-20 md:w-20"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 const SLIDES = [
   "/slide1.png",
   "/slide2.png",
@@ -42,6 +109,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [activePatchFilter, setActivePatchFilter] = useState<string>("Tous");
   const [slideIndex, setSlideIndex] = useState(0);
+  const [loreSelectedIndex, setLoreSelectedIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -53,6 +121,57 @@ export default function Home() {
   const { data: jobs, isLoading: isJobsLoading } = useListJobs();
   const { data: illegalOrgs, isLoading: isIllegalLoading } = useListIllegalOrgs();
   const { data: staff, isLoading: isStaffLoading } = useListStaff();
+  const { data: loreRows, isLoading: isLoreLoading } = useListLore();
+  const { data: patchNotesData, isLoading: isPatchNotesLoading } = useListPatchNotes();
+  const { data: galleryData, isLoading: isGalleryLoading } = useListGallery();
+
+  const jobsList = Array.isArray(jobs) ? jobs : [];
+  const staffList = Array.isArray(staff) ? staff : [];
+  const illegalOrgsList = Array.isArray(illegalOrgs) ? illegalOrgs : [];
+  const ILLEGAL_SEGMENT_ORDER = ["Gang", "Organisation", "Indépendant"] as const;
+  type IllegalSeg = (typeof ILLEGAL_SEGMENT_ORDER)[number];
+  const ILLEGAL_SEGMENT_TITLES: Record<IllegalSeg, string> = {
+    Gang: "Gangs",
+    Organisation: "Organisations",
+    Indépendant: "Indépendants",
+  };
+  const normalizeIllegalSegmentHome = (s: string | undefined): IllegalSeg => {
+    const t = (s ?? "").trim();
+    return (ILLEGAL_SEGMENT_ORDER as readonly string[]).includes(t) ? (t as IllegalSeg) : "Organisation";
+  };
+  const illegalGroups = ILLEGAL_SEGMENT_ORDER.map((seg) => ({
+    segment: seg,
+    title: ILLEGAL_SEGMENT_TITLES[seg],
+    orgs: illegalOrgsList.filter((o) => normalizeIllegalSegmentHome(o.segment) === seg),
+  }));
+  const loreList = Array.isArray(loreRows)
+    ? [...loreRows].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
+    : [];
+
+  const patchNotesList = Array.isArray(patchNotesData)
+    ? [...patchNotesData].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
+    : [];
+
+  const galleryList = Array.isArray(galleryData)
+    ? [...galleryData].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
+    : [];
+
+  useEffect(() => {
+    if (loreList.length === 0) return;
+    if (loreSelectedIndex >= loreList.length) setLoreSelectedIndex(0);
+  }, [loreList.length, loreSelectedIndex]);
+
+  const loreSafeIndex =
+    loreList.length > 0 ? Math.min(loreSelectedIndex, loreList.length - 1) : 0;
+  const selectedLore = loreList[loreSafeIndex];
+  const loreHeroSrc =
+    selectedLore?.imageUrl?.trim() || SLIDES[loreSafeIndex % SLIDES.length];
+
+  const groupedJobs = jobsList.reduce<Record<string, Job[]>>((acc, job) => {
+    if (!acc[job.category]) acc[job.category] = [];
+    acc[job.category]!.push(job);
+    return acc;
+  }, {});
 
   const handleCopyIP = () => {
     navigator.clipboard.writeText("cfx.re/join/palmafa");
@@ -65,25 +184,10 @@ export default function Home() {
   };
 
   const filteredPatchNotes = activePatchFilter === "Tous" 
-    ? PATCH_NOTES 
-    : PATCH_NOTES.filter(p => p.category === activePatchFilter);
+    ? patchNotesList 
+    : patchNotesList.filter((p) => p.category === activePatchFilter);
 
-  const patchCategories = ["Tous", ...Array.from(new Set(PATCH_NOTES.map(p => p.category)))];
-
-  type Job = NonNullable<typeof jobs>[number];
-  type StaffMember = NonNullable<typeof staff>[number];
-
-  const groupedJobs = (jobs ?? []).reduce<Record<string, Job[]>>((acc, job) => {
-    if (!acc[job.category]) acc[job.category] = [];
-    acc[job.category]!.push(job);
-    return acc;
-  }, {});
-
-  const groupedStaff = (staff ?? []).reduce<Record<string, StaffMember[]>>((acc, member) => {
-    if (!acc[member.category]) acc[member.category] = [];
-    acc[member.category]!.push(member);
-    return acc;
-  }, {});
+  const patchCategories = ["Tous", ...Array.from(new Set(patchNotesList.map((p) => p.category)))];
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
@@ -112,8 +216,21 @@ export default function Home() {
             </AnimatePresence>
             {/* Dark overlay for readability */}
             <div className="absolute inset-0 bg-black/60 z-10"></div>
-            {/* Bottom fade to site background */}
-            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent z-10"></div>
+            {/* Bottom fade to site background + marque P */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 h-48 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+              <div className="absolute bottom-14 left-1/2 flex -translate-x-1/2 justify-center md:bottom-16">
+                <img
+                  src={palmaPTabLogo}
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="h-8 w-8 object-contain opacity-90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.55)] md:h-9 md:w-9"
+                  aria-hidden
+                  decoding="async"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Slide indicators */}
@@ -187,7 +304,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row items-center gap-4"
             >
               <a
-                href="https://discord.gg/palmafa"
+                href="https://discord.gg/rxvfFQvxV"
                 data-testid="link-discord-hero"
                 className="flex items-center gap-2 px-7 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-base hover:shadow-[0_0_25px_rgba(253,224,71,0.4)] transition-all transform hover:-translate-y-0.5"
               >
@@ -209,24 +326,49 @@ export default function Home() {
           </div>
         </section>
 
-        {/* NOUVEAUTÉS */}
-        <section id="patch-notes" className="py-24 bg-card/30">
-          <div className="container mx-auto px-4 md:px-6">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}>
-              <div className="flex items-center gap-4 mb-12">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary"><Server size={28} /></div>
-                <h2 className="text-4xl md:text-5xl font-bold">Nouveautés</h2>
-              </div>
-              
-              <div className="flex flex-wrap gap-3 mb-10">
-                {patchCategories.map(cat => (
+        {/* NOUVEAUTÉS — timeline style */}
+        <section id="patch-notes" className="relative overflow-hidden bg-gradient-to-b from-[hsl(158_9%_4.8%)] via-[hsl(160_10%_5.4%)] to-[hsl(158_12%_6.4%)] py-20 text-zinc-100 md:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary) / 0.06),transparent)]" />
+          <div className="container relative mx-auto max-w-3xl px-4 md:px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              variants={fadeUp}
+            >
+              <header className="mb-12 text-center md:mb-16">
+                <div className="mb-6 flex justify-center md:mb-8">
+                  <img
+                    src={palmaPTabLogo}
+                    alt=""
+                    width={72}
+                    height={72}
+                    className="h-16 w-16 object-contain opacity-95 drop-shadow-[0_0_32px_rgba(253,224,71,0.22)] md:h-[72px] md:w-[72px]"
+                    decoding="async"
+                    draggable={false}
+                  />
+                </div>
+                <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl lg:text-6xl">
+                  <span className="bg-gradient-to-r from-primary via-yellow-200 to-amber-400 bg-clip-text text-transparent">
+                    Nouveautés
+                  </span>
+                  <span className="text-white"> &amp; patch notes</span>
+                </h2>
+                <p className="mx-auto max-w-2xl text-base text-zinc-400 md:text-lg">
+                  Restez informé des dernières mises à jour, corrections et événements du serveur.
+                </p>
+              </header>
+
+              <div className="mb-12 flex flex-wrap justify-center gap-2">
+                {patchCategories.map((cat) => (
                   <button
                     key={cat}
+                    type="button"
                     onClick={() => setActivePatchFilter(cat)}
-                    className={`px-5 py-2 rounded-full font-medium transition-all ${
-                      activePatchFilter === cat 
-                      ? "bg-primary text-primary-foreground" 
-                      : "bg-card border border-border text-muted-foreground hover:text-foreground"
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                      activePatchFilter === cat
+                        ? "border-primary bg-primary/20 text-white shadow-[0_0_24px_-8px_hsl(var(--primary) / 0.45)]"
+                        : "border-white/[0.08] bg-[hsl(160_8%_6.8%)]/45 text-zinc-400 hover:border-primary/35 hover:text-zinc-200"
                     }`}
                   >
                     {cat}
@@ -234,65 +376,207 @@ export default function Home() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPatchNotes.map((note, i) => (
-                  <motion.div 
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors group relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Server size={80} />
-                    </div>
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                      <div>
-                        <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3">{note.category}</span>
-                        <h3 className="text-2xl font-bold">{note.version}</h3>
+              <div className="relative pl-2 md:pl-0">
+                <div
+                  className="absolute left-[15px] top-2 bottom-8 w-px bg-gradient-to-b from-primary/80 via-primary/40 to-[hsl(158_8%_4.5%)] md:left-1/2 md:-translate-x-1/2"
+                  aria-hidden
+                />
+
+                {filteredPatchNotes.length === 0 ? (
+                  <p className="py-12 text-center text-zinc-500">
+                    {isPatchNotesLoading ? "Chargement des nouveautés…" : "Aucun patch pour ce filtre."}
+                  </p>
+                ) : (
+                  filteredPatchNotes.map((note, i) => (
+                    <div key={note.id} className="relative pb-14 last:pb-4">
+                      <div className="absolute left-[15px] top-3 z-10 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 border-primary/90 bg-primary shadow-[0_0_14px_hsl(var(--primary) / 0.85)] ring-4 ring-[hsl(158_9%_4.8%)] md:left-1/2" />
+
+                      <div className="pl-10 md:mx-auto md:max-w-xl md:pl-0 md:pr-[calc(50%+1.5rem)]">
+                        <motion.div
+                          initial={{ opacity: 0, y: 16 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.06 }}
+                          className="rounded-2xl border border-white/[0.08] bg-[hsl(160_9%_6.2%)]/90 p-6 shadow-[0_0_40px_-12px_hsl(var(--primary) / 0.15)] backdrop-blur-sm md:text-left"
+                        >
+                          <div className="mb-4 flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-start">
+                            <h3 className="text-xl font-bold text-white md:text-2xl">Mise à jour du serveur</h3>
+                            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100">
+                              <Wrench className="h-3.5 w-3.5" strokeWidth={2.5} />
+                              Patch {note.version}
+                            </span>
+                          </div>
+                          <div className="mb-4 flex items-center gap-2 text-sm text-zinc-400">
+                            <Calendar className="h-4 w-4 text-primary" />
+                            {note.date}
+                          </div>
+                          <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+                            Voici les derniers changements appliqués sur le serveur ({note.category}).
+                          </p>
+                          <p className="mb-3 text-sm font-semibold tracking-wide text-white">Changements :</p>
+                          <ul className="mb-8 space-y-2.5">
+                            {note.changes.map((change, j) => (
+                              <li key={j} className="flex gap-3 text-sm text-zinc-300">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                                <span>{change}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="flex gap-3 rounded-xl border border-secondary/35 bg-secondary/10 p-4">
+                            <Info className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                            <div>
+                              <p className="mb-1 text-sm font-semibold text-secondary">Note</p>
+                              <p className="text-xs leading-relaxed text-zinc-400">
+                                Catégorie « {note.category} » — en cas de doute sur une mécanique RP, vérifiez le règlement ou demandez sur Discord.
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
                       </div>
-                      <span className="text-sm text-muted-foreground font-mono">{note.date}</span>
                     </div>
-                    <ul className="space-y-3 relative z-10">
-                      {note.changes.map((change, j) => (
-                        <li key={j} className="flex items-start gap-2 text-muted-foreground">
-                          <ChevronRight className="w-5 h-5 text-secondary shrink-0" />
-                          <span>{change}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                ))}
+                  ))
+                )}
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* LORE */}
-        <section id="lore" className="py-24">
-          <div className="container mx-auto px-4 md:px-6">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-              <div className="flex items-center gap-4 mb-12">
-                <div className="p-3 rounded-xl bg-secondary/10 text-secondary"><MapPin size={28} /></div>
-                <h2 className="text-4xl md:text-5xl font-bold">Le Lore</h2>
-              </div>
+        {/* LORE — chapitres + carte */}
+        <section id="lore" className="relative bg-gradient-to-b from-[hsl(158_9%_4.8%)] via-[hsl(160_10%_5.4%)] to-[hsl(158_12%_6.4%)] py-20 text-zinc-100 md:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_0%,hsl(var(--primary) / 0.05),transparent)]" />
+          <div className="container relative mx-auto max-w-4xl px-4 md:px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={fadeUp}
+            >
+              <header className="mb-10 text-center md:mb-14">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/45 bg-primary/15 text-primary">
+                  <BookOpen className="h-8 w-8" strokeWidth={1.75} />
+                </div>
+                <h2 className="mb-4 text-4xl font-black tracking-tight text-white md:text-5xl">
+                  L&apos;univers de{" "}
+                  <span className="bg-gradient-to-r from-primary to-amber-300 bg-clip-text text-transparent">
+                    Palma
+                  </span>
+                </h2>
+                <p className="mx-auto max-w-2xl text-lg italic leading-relaxed text-zinc-400">
+                  « Chaque rue raconte une histoire. Découvrez le lore officiel du serveur Palma FA. »
+                </p>
+              </header>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {LORE.map((item, i) => (
-                  <motion.div 
-                    key={i}
-                    whileHover={{ y: -5 }}
-                    className="p-8 rounded-2xl bg-gradient-to-br from-card to-background border border-border hover:border-secondary/30 transition-all flex flex-col"
-                  >
-                    <h3 className="text-2xl font-bold mb-4 text-foreground">{item.title}</h3>
-                    <p className="text-muted-foreground mb-8 flex-1 leading-relaxed">{item.summary}</p>
-                    <button className="self-start px-5 py-2.5 rounded-lg bg-secondary/10 text-secondary font-medium hover:bg-secondary/20 transition-colors flex items-center gap-2">
-                      Lire plus <ChevronRight size={18} />
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
+              {isLoreLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="mx-auto h-11 max-w-2xl rounded-full bg-[hsl(160_8%_8%)]" />
+                  <Skeleton className="h-[420px] w-full rounded-2xl bg-[hsl(160_9%_7%)]" />
+                </div>
+              ) : loreList.length === 0 ? (
+                <p className="rounded-2xl border border-white/[0.08] bg-[hsl(160_9%_6.2%)]/80 py-14 text-center text-zinc-500">
+                  Le lore sera affiché ici une fois ajouté depuis le panneau admin.
+                </p>
+              ) : (
+                <>
+                  <div className="mb-8 flex flex-wrap justify-center gap-2 md:gap-3">
+                    {loreList.map((entry, idx) => (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => setLoreSelectedIndex(idx)}
+                        className={`max-w-[min(100%,280px)] rounded-full border px-4 py-2.5 text-left text-sm font-medium transition-all ${
+                          loreSafeIndex === idx
+                            ? "border-primary bg-primary/20 text-white shadow-[0_0_24px_-8px_hsl(var(--primary) / 0.4)]"
+                            : "border-white/[0.08] bg-[hsl(160_8%_6.8%)]/45 text-zinc-400 hover:border-primary/35 hover:text-zinc-200"
+                        }`}
+                      >
+                        <span className="mr-2 font-mono text-primary">{idx + 1}</span>
+                        <span className="line-clamp-1">{entry.title}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedLore && (
+                    <motion.div
+                      key={selectedLore.id}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[hsl(160_9%_6.2%)]/90 shadow-[0_0_50px_-15px_hsl(var(--primary) / 0.18)] backdrop-blur-sm"
+                    >
+                      <div className="aspect-[21/9] max-h-[320px] w-full overflow-hidden bg-[hsl(162_8%_5%)] md:aspect-video">
+                        <img
+                          src={loreHeroSrc}
+                          alt=""
+                          className="h-full w-full object-cover opacity-95"
+                        />
+                      </div>
+                      <div className="p-6 md:p-10">
+                        <span className="mb-4 inline-block rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+                          Chapitre {loreSafeIndex + 1}
+                        </span>
+                        <h3 className="mb-4 text-2xl font-bold text-white md:text-3xl">{selectedLore.title}</h3>
+                        <p className="whitespace-pre-wrap leading-relaxed text-zinc-300">{selectedLore.summary}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* GALERIE — images + descriptions (admin) */}
+        <section id="galerie" className="relative border-y border-border/60 bg-background py-20 md:py-28">
+          <div className="container relative mx-auto max-w-6xl px-4 md:px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={fadeUp}
+            >
+              <header className="mb-12 text-center md:mb-16">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/45 bg-primary/15 text-primary">
+                  <ImageIcon className="h-8 w-8" strokeWidth={1.75} />
+                </div>
+                <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
+                  <span className="bg-gradient-to-r from-primary to-amber-300 bg-clip-text text-transparent">Galerie</span>
+                </h2>
+                <p className="mx-auto max-w-2xl text-muted-foreground md:text-lg">
+                  Visuels et textes gérés depuis le panneau admin — parfait pour événements, screenshots ou affiches du serveur.
+                </p>
+              </header>
+
+              {isGalleryLoading ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(3)].map((_, i) => (
+                    <Skeleton key={i} className="aspect-video w-full rounded-2xl" />
+                  ))}
+                </div>
+              ) : galleryList.length === 0 ? (
+                <p className="rounded-2xl border border-border bg-card/50 py-14 text-center text-muted-foreground">
+                  Aucune image pour le moment — ajoute-en depuis l&apos;onglet « Galerie » du panneau admin.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {galleryList.map((item, i) => (
+                    <motion.article
+                      key={item.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.05 }}
+                      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+                    >
+                      <div className="aspect-video w-full overflow-hidden bg-muted">
+                        <img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="p-5">
+                        <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{item.description}</p>
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
@@ -311,13 +595,30 @@ export default function Home() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[140px] rounded-xl" />)}
                   </div>
+                ) : Object.keys(groupedJobs).length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Aucun métier pour le moment — ajoutez-en depuis le panneau admin.
+                  </p>
                 ) : (
-                  Object.entries(groupedJobs!).map(([category, categoryJobs], idx) => (
+                  Object.entries(groupedJobs).map(([category, categoryJobs]) => (
                     <div key={category}>
                       <h3 className="text-2xl font-bold mb-6 text-foreground/80 border-b border-border pb-4">{category}</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {categoryJobs.map((job, i) => (
-                          <div key={i} className="p-5 rounded-xl bg-card border border-border flex flex-col items-start justify-between min-h-[140px]">
+                        {categoryJobs.map((job) => (
+                          <div
+                            key={job.id}
+                            className="overflow-hidden rounded-xl bg-card border border-border flex flex-col min-h-[140px]"
+                          >
+                            <div className="relative aspect-[2/1] w-full shrink-0 bg-muted">
+                              {job.imageUrl?.trim() ? (
+                                <img src={job.imageUrl.trim()} alt="" className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-muted text-primary/40">
+                                  <Briefcase className="h-10 w-10" strokeWidth={1.25} />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-1 flex-col p-5 pt-4">
                             <div className="w-full flex justify-between items-start mb-4">
                               <h4 className="text-lg font-bold">{job.name}</h4>
                               <span className={`text-xs font-bold px-2 py-1 rounded-md ${
@@ -348,6 +649,7 @@ export default function Home() {
                                 </a>
                               )}
                             </div>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -366,20 +668,36 @@ export default function Home() {
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
               <div className="flex items-center gap-4 mb-12">
                 <div className="p-3 rounded-xl bg-destructive/10 text-destructive"><Skull size={28} /></div>
-                <h2 className="text-4xl md:text-5xl font-bold">L'Ombre de Palma</h2>
+                <h2 className="text-4xl md:text-5xl font-bold">Illégal</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {isIllegalLoading ? (
-                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-[200px] rounded-2xl" />)
-                ) : (
-                  illegalOrgs?.map((org, i) => (
+              {isIllegalLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <Skeleton key={i} className="h-[200px] rounded-2xl" />
+                  ))}
+                </div>
+              ) : illegalOrgsList.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  Aucune fiche illégale — ajoutez-en depuis le panneau admin (Gangs, Organisations ou Indépendants).
+                </p>
+              ) : (
+                <div className="space-y-14 md:space-y-16">
+                  {illegalGroups.map(({ segment, title, orgs }) =>
+                    orgs.length === 0 ? null : (
+                      <div key={segment}>
+                        <h3 className="mb-6 border-b border-destructive/30 pb-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                          {title}
+                        </h3>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                          {orgs.map((org) => (
                     <motion.div 
-                      key={i}
+                      key={org.id}
                       whileHover={{ scale: 1.02 }}
-                      className="p-6 rounded-2xl bg-card/80 backdrop-blur border border-destructive/20 hover:border-destructive/50 transition-all shadow-[0_0_0_rgba(220,38,38,0)] hover:shadow-[0_0_20px_rgba(220,38,38,0.1)] relative overflow-hidden group"
+                      className="rounded-2xl bg-card/80 backdrop-blur border border-destructive/20 hover:border-destructive/50 transition-all shadow-[0_0_0_rgba(220,38,38,0)] hover:shadow-[0_0_20px_rgba(220,38,38,0.1)] relative overflow-hidden group flex flex-col"
                     >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/10 rounded-bl-full -mr-10 -mt-10 group-hover:scale-110 transition-transform"></div>
+                      <IllegalOrgCardBanner imageUrl={org.imageUrl} />
+                      <div className="relative p-6 flex flex-col flex-1">
                       <div className="flex justify-between items-start mb-6 relative z-10">
                         <h3 className="text-2xl font-black text-foreground">{org.name}</h3>
                         <div className="flex flex-col items-end gap-2">
@@ -403,10 +721,15 @@ export default function Home() {
                           </div>
                         ))}
                       </div>
+                      </div>
                     </motion.div>
-                  ))
-                )}
-              </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
@@ -423,9 +746,13 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {isStaffLoading ? (
                   [...Array(4)].map((_, i) => <Skeleton key={i} className="h-[240px] rounded-2xl" />)
+                ) : staffList.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8 col-span-full">
+                    Aucun membre d&apos;équipe — ajoutez-en depuis le panneau admin.
+                  </p>
                 ) : (
-                  staff?.map((member, i) => (
-                    <div key={i} className="p-6 rounded-2xl bg-card border border-border text-center flex flex-col items-center group hover:border-primary/30 transition-all">
+                  staffList.map((member) => (
+                    <div key={member.id} className="p-6 rounded-2xl bg-card border border-border text-center flex flex-col items-center group hover:border-primary/30 transition-all">
                       <div className="w-24 h-24 rounded-full bg-muted mb-4 overflow-hidden border-2 border-transparent group-hover:border-primary transition-all flex items-center justify-center">
                         {member.avatarUrl ? (
                           <img src={member.avatarUrl} alt={member.pseudo} className="w-full h-full object-cover" />
@@ -478,7 +805,7 @@ export default function Home() {
 
               <div className="flex flex-wrap justify-center gap-4 md:gap-6">
                 {[
-                  { icon: <SiDiscord size={32} />, label: "Discord", color: "hover:bg-[#5865F2] hover:border-[#5865F2]", href: "https://discord.gg/palmafa" },
+                  { icon: <SiDiscord size={32} />, label: "Discord", color: "hover:bg-[#5865F2] hover:border-[#5865F2]", href: "https://discord.gg/rxvfFQvxV" },
                   { icon: <SiTiktok size={32} />, label: "TikTok", color: "hover:bg-[#00f2fe] hover:border-[#00f2fe]", href: "#" },
                   { icon: <SiYoutube size={32} />, label: "YouTube", color: "hover:bg-[#FF0000] hover:border-[#FF0000]", href: "#" },
                   { icon: <SiInstagram size={32} />, label: "Instagram", color: "hover:bg-[#E1306C] hover:border-[#E1306C]", href: "#" },

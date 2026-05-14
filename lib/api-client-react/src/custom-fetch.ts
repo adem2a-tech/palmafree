@@ -1,3 +1,5 @@
+import { palmaMockApiEnabled, dispatchPalmaMock } from "./palma-mock-api";
+
 export type CustomFetchOptions = RequestInit & {
   responseType?: "json" | "text" | "blob" | "auto";
 };
@@ -360,7 +362,31 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  if (typeof window !== "undefined" && palmaMockApiEnabled()) {
+    const mock = dispatchPalmaMock(requestInfo.url, method, init.body);
+    if (!mock.ok) {
+      const bodyText =
+        typeof mock.data === "string"
+          ? mock.data
+          : JSON.stringify(mock.data ?? { error: "error" });
+      const res = new Response(bodyText, {
+        status: mock.status,
+        statusText: mock.status === 401 ? "Unauthorized" : "Error",
+        headers: { "content-type": "application/json" },
+      });
+      throw new ApiError(
+        res,
+        typeof mock.data === "object" ? mock.data : { detail: mock.data },
+        requestInfo,
+      );
+    }
+    if (mock.status === 204 || mock.data === undefined) {
+      return undefined as T;
+    }
+    return mock.data as T;
+  }
+
+  const response = await fetch(input, { ...init, method, headers, credentials: "include" });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

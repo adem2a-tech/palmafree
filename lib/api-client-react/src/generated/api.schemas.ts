@@ -16,12 +16,28 @@ export interface Job {
   available: boolean;
   /** @nullable */
   discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
 }
 
-export interface JobUpdate {
+export interface JobInput {
+  name: string;
+  category: string;
   available?: boolean;
   /** @nullable */
   discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+}
+
+export interface JobUpdate {
+  name?: string;
+  category?: string;
+  available?: boolean;
+  /** @nullable */
+  discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
 }
 
 export interface IllegalOrg {
@@ -31,12 +47,100 @@ export interface IllegalOrg {
   activities: string[];
   /** @nullable */
   discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  segment: string;
+}
+
+export interface IllegalOrgInput {
+  name: string;
+  status: string;
+  activities: string[];
+  /** @nullable */
+  discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  segment?: string;
 }
 
 export interface IllegalOrgUpdate {
+  name?: string;
   status?: string;
+  activities?: string[];
   /** @nullable */
   discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  segment?: string;
+}
+
+export interface LoreEntry {
+  id: number;
+  title: string;
+  summary: string;
+  sortOrder: number;
+  /** @nullable */
+  imageUrl?: string | null;
+}
+
+export interface LoreInput {
+  title: string;
+  summary: string;
+  sortOrder?: number;
+  /** @nullable */
+  imageUrl?: string | null;
+}
+
+export interface LoreUpdate {
+  title?: string;
+  summary?: string;
+  sortOrder?: number;
+  /** @nullable */
+  imageUrl?: string | null;
+}
+
+export interface PatchNote {
+  id: number;
+  version: string;
+  date: string;
+  category: string;
+  changes: string[];
+  sortOrder: number;
+}
+
+export interface PatchNoteInput {
+  version: string;
+  date: string;
+  category: string;
+  changes: string[];
+  sortOrder?: number;
+}
+
+export interface PatchNoteUpdate {
+  version?: string;
+  date?: string;
+  category?: string;
+  changes?: string[];
+  sortOrder?: number;
+}
+
+export interface GalleryItem {
+  id: number;
+  imageUrl: string;
+  description: string;
+  sortOrder: number;
+}
+
+export interface GalleryItemInput {
+  imageUrl: string;
+  description: string;
+  sortOrder?: number;
+}
+
+export interface GalleryItemUpdate {
+  imageUrl?: string;
+  description?: string;
+  sortOrder?: number;
 }
 
 export interface Staff {
@@ -72,7 +176,7 @@ export interface StaffUpdate {
 
 export interface AdminLoginInput {
   username: string;
-  password: string;
+  password?: string;
 }
 
 export interface AdminMe {

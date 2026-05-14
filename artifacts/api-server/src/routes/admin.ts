@@ -1,6 +1,9 @@
 import { Router, type IRouter } from "express";
 import { AdminLoginBody, AdminMeResponse } from "@workspace/api-zod";
 
+/** Mot de passe admin par défaut (chiffres uniquement) si `ADMIN_PASSWORD` n’est pas défini. */
+const DEFAULT_ADMIN_PASSWORD = "2715";
+
 const router: IRouter = Router();
 
 router.post("/admin/login", async (req, res): Promise<void> => {
@@ -11,11 +14,20 @@ router.post("/admin/login", async (req, res): Promise<void> => {
   }
 
   const { username, password } = parsed.data;
-  const adminPass = (process.env.ADMIN_PASSWORD || "admin").trim();
+  const fromEnv = process.env.ADMIN_PASSWORD?.trim();
+  const inputPass = (password ?? "").trim();
+  const okPassword = fromEnv ? inputPass === fromEnv : inputPass === DEFAULT_ADMIN_PASSWORD;
 
-  req.log.info({ usernameMatch: username === "admin", passLen: adminPass.length }, "Login attempt");
+  req.log.info(
+    { usernameMatch: username === "admin", usingEnvPassword: Boolean(fromEnv) },
+    "Login attempt",
+  );
 
-  if (username === "admin" && password.trim() === adminPass) {
+  const allowOpen =
+    process.env.ALLOW_OPEN_ADMIN === "1" ||
+    process.env.ALLOW_OPEN_ADMIN === "true";
+
+  if (username === "admin" && (okPassword || allowOpen)) {
     (req.session as any).isAdmin = true;
     res.sendStatus(200);
   } else {

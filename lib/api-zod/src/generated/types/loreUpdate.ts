@@ -6,12 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface JobUpdate {
-  name?: string;
-  category?: string;
-  available?: boolean;
-  /** @nullable */
-  discordLink?: string | null;
+export interface LoreUpdate {
+  title?: string;
+  summary?: string;
+  sortOrder?: number;
   /** @nullable */
   imageUrl?: string | null;
 }

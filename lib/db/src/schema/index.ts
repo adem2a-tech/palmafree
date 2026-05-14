@@ -20,3 +20,6 @@
 export * from "./jobs";
 export * from "./illegal-orgs";
 export * from "./staff";
+export * from "./lore";
+export * from "./patch-notes";
+export * from "./gallery";

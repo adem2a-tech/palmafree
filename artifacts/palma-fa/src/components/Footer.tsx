@@ -27,7 +27,9 @@ export function Footer() {
             <ul className="space-y-2">
               <li><a href="#home" className="text-muted-foreground hover:text-primary transition-colors">Accueil</a></li>
               <li><a href="#lore" className="text-muted-foreground hover:text-primary transition-colors">Lore</a></li>
+              <li><a href="#galerie" className="text-muted-foreground hover:text-primary transition-colors">Galerie</a></li>
               <li><a href="#jobs" className="text-muted-foreground hover:text-primary transition-colors">Métiers</a></li>
+              <li><a href="#patch-notes" className="text-muted-foreground hover:text-primary transition-colors">Nouveautés</a></li>
               <li><a href="https://wiki.palma-fa.fr" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">Wiki</a></li>
             </ul>
           </div>

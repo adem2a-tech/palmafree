@@ -8,6 +8,7 @@ export const jobsTable = pgTable("jobs", {
   category: text("category").notNull(), // Service Public | Entreprises Privées | Freelance
   available: boolean("available").notNull().default(true),
   discordLink: text("discord_link"),
+  imageUrl: text("image_url"),
 });
 
 export const insertJobSchema = createInsertSchema(jobsTable).omit({ id: true });

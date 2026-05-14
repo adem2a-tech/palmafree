@@ -6,13 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Job {
+export interface PatchNote {
   id: number;
-  name: string;
+  version: string;
+  date: string;
   category: string;
-  available: boolean;
-  /** @nullable */
-  discordLink?: string | null;
-  /** @nullable */
-  imageUrl?: string | null;
+  changes: string[];
+  sortOrder: number;
 }

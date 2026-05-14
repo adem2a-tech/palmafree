@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AdminLoginInput {
-  username: string;
-  password?: string;
+export interface GalleryItem {
+  id: number;
+  imageUrl: string;
+  description: string;
+  sortOrder: number;
 }

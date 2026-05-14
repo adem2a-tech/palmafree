@@ -8,6 +8,9 @@ export const illegalOrgsTable = pgTable("illegal_orgs", {
   status: text("status").notNull(), // Recrute | Complet | Fermé
   activities: text("activities").array().notNull(),
   discordLink: text("discord_link"),
+  imageUrl: text("image_url"),
+  /** Gang | Organisation | Indépendant */
+  segment: text("segment").notNull().default("Organisation"),
 });
 
 export const insertIllegalOrgSchema = createInsertSchema(illegalOrgsTable).omit({ id: true });

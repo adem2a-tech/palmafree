@@ -7,7 +7,12 @@
  */
 
 export interface IllegalOrgUpdate {
+  name?: string;
   status?: string;
+  activities?: string[];
   /** @nullable */
   discordLink?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  segment?: string;
 }

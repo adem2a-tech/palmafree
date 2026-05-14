@@ -15,6 +15,12 @@ tags:
     description: Illegal organizations operations
   - name: staff
     description: Staff members operations
+  - name: lore
+    description: Lore entries
+  - name: patchNotes
+    description: Patch notes / nouveautés
+  - name: gallery
+    description: Galerie images + descriptions
   - name: admin
     description: Admin operations
 paths:
@@ -76,6 +82,185 @@ paths:
                 items:
                   $ref: "#/components/schemas/Staff"
 
+  /lore:
+    get:
+      operationId: listLore
+      tags: [lore]
+      summary: List lore entries
+      responses:
+        "200":
+          description: List of lore entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoreEntry"
+
+  /patch-notes:
+    get:
+      operationId: listPatchNotes
+      tags: [patchNotes]
+      summary: List patch notes (nouveautés)
+      responses:
+        "200":
+          description: List of patch notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PatchNote"
+
+  /gallery:
+    get:
+      operationId: listGallery
+      tags: [gallery]
+      summary: List gallery items (images + descriptions)
+      responses:
+        "200":
+          description: List of gallery items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryItem"
+
+  /admin/gallery:
+    post:
+      operationId: createGalleryItem
+      tags: [admin]
+      summary: Create a gallery item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GalleryItemInput"
+      responses:
+        "201":
+          description: Created gallery item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+        "401":
+          description: Unauthorized
+
+  /admin/gallery/{id}:
+    patch:
+      operationId: updateGalleryItem
+      tags: [admin]
+      summary: Update a gallery item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GalleryItemUpdate"
+      responses:
+        "200":
+          description: Updated gallery item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Gallery item not found
+    delete:
+      operationId: deleteGalleryItem
+      tags: [admin]
+      summary: Delete a gallery item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Gallery item not found
+
+  /admin/patch-notes:
+    post:
+      operationId: createPatchNote
+      tags: [admin]
+      summary: Create a patch note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchNoteInput"
+      responses:
+        "201":
+          description: Created patch note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchNote"
+        "401":
+          description: Unauthorized
+
+  /admin/patch-notes/{id}:
+    patch:
+      operationId: updatePatchNote
+      tags: [admin]
+      summary: Update a patch note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchNoteUpdate"
+      responses:
+        "200":
+          description: Updated patch note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchNote"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Patch note not found
+    delete:
+      operationId: deletePatchNote
+      tags: [admin]
+      summary: Delete a patch note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Patch note not found
+
   /admin/login:
     post:
       operationId: adminLogin
@@ -115,6 +300,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdminMe"
 
+  /admin/jobs:
+    post:
+      operationId: createJob
+      tags: [admin]
+      summary: Create a job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "401":
+          description: Unauthorized
+
   /admin/jobs/{id}:
     patch:
       operationId: updateJob
@@ -143,6 +349,44 @@ paths:
           description: Unauthorized
         "404":
           description: Job not found
+    delete:
+      operationId: deleteJob
+      tags: [admin]
+      summary: Delete a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Job not found
+
+  /admin/illegal:
+    post:
+      operationId: createIllegalOrg
+      tags: [admin]
+      summary: Create an illegal organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IllegalOrgInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IllegalOrg"
+        "401":
+          description: Unauthorized
 
   /admin/illegal/{id}:
     patch:
@@ -172,6 +416,90 @@ paths:
           description: Unauthorized
         "404":
           description: Illegal organization not found
+    delete:
+      operationId: deleteIllegalOrg
+      tags: [admin]
+      summary: Delete an illegal organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Illegal organization not found
+
+  /admin/lore:
+    post:
+      operationId: createLore
+      tags: [admin]
+      summary: Create a lore entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoreInput"
+      responses:
+        "201":
+          description: Created lore entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoreEntry"
+        "401":
+          description: Unauthorized
+
+  /admin/lore/{id}:
+    patch:
+      operationId: updateLore
+      tags: [admin]
+      summary: Update a lore entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoreUpdate"
+      responses:
+        "200":
+          description: Updated lore entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoreEntry"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Lore entry not found
+    delete:
+      operationId: deleteLore
+      tags: [admin]
+      summary: Delete a lore entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Lore entry not found
 
   /admin/staff:
     get:
@@ -272,16 +600,30 @@ components:
         category: { type: string }
         available: { type: boolean }
         discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+
+    JobInput:
+      type: object
+      required: [name, category]
+      properties:
+        name: { type: string }
+        category: { type: string }
+        available: { type: boolean }
+        discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
 
     JobUpdate:
       type: object
       properties:
+        name: { type: string }
+        category: { type: string }
         available: { type: boolean }
         discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
 
     IllegalOrg:
       type: object
-      required: [id, name, status, activities]
+      required: [id, name, status, activities, segment]
       properties:
         id: { type: integer }
         name: { type: string }
@@ -290,12 +632,124 @@ components:
           type: array
           items: { type: string }
         discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        segment:
+          type: string
+          description: Regroupement affiché sur le site (Gang, Organisation, Indépendant).
+
+    IllegalOrgInput:
+      type: object
+      required: [name, status, activities]
+      properties:
+        name: { type: string }
+        status: { type: string }
+        activities:
+          type: array
+          items: { type: string }
+        discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        segment:
+          type: string
+          description: Gang | Organisation | Indépendant (défaut Organisation si omis).
 
     IllegalOrgUpdate:
       type: object
       properties:
+        name: { type: string }
         status: { type: string }
+        activities:
+          type: array
+          items: { type: string }
         discordLink: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        segment: { type: string }
+
+    LoreEntry:
+      type: object
+      required: [id, title, summary, sortOrder]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        summary: { type: string }
+        sortOrder: { type: integer }
+        imageUrl: { type: ["string", "null"] }
+
+    LoreInput:
+      type: object
+      required: [title, summary]
+      properties:
+        title: { type: string }
+        summary: { type: string }
+        sortOrder: { type: integer }
+        imageUrl: { type: ["string", "null"] }
+
+    LoreUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        summary: { type: string }
+        sortOrder: { type: integer }
+        imageUrl: { type: ["string", "null"] }
+
+    PatchNote:
+      type: object
+      required: [id, version, date, category, changes, sortOrder]
+      properties:
+        id: { type: integer }
+        version: { type: string }
+        date: { type: string }
+        category: { type: string }
+        changes:
+          type: array
+          items: { type: string }
+        sortOrder: { type: integer }
+
+    PatchNoteInput:
+      type: object
+      required: [version, date, category, changes]
+      properties:
+        version: { type: string }
+        date: { type: string }
+        category: { type: string }
+        changes:
+          type: array
+          items: { type: string }
+        sortOrder: { type: integer }
+
+    PatchNoteUpdate:
+      type: object
+      properties:
+        version: { type: string }
+        date: { type: string }
+        category: { type: string }
+        changes:
+          type: array
+          items: { type: string }
+        sortOrder: { type: integer }
+
+    GalleryItem:
+      type: object
+      required: [id, imageUrl, description, sortOrder]
+      properties:
+        id: { type: integer }
+        imageUrl: { type: string }
+        description: { type: string }
+        sortOrder: { type: integer }
+
+    GalleryItemInput:
+      type: object
+      required: [imageUrl, description]
+      properties:
+        imageUrl: { type: string }
+        description: { type: string }
+        sortOrder: { type: integer }
+
+    GalleryItemUpdate:
+      type: object
+      properties:
+        imageUrl: { type: string }
+        description: { type: string }
+        sortOrder: { type: integer }
 
     Staff:
       type: object
@@ -332,7 +786,7 @@ components:
 
     AdminLoginInput:
       type: object
-      required: [username, password]
+      required: [username]
       properties:
         username: { type: string }
         password: { type: string }

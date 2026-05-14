@@ -35,8 +35,8 @@ app.use(cors({
   origin: true,
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "12mb" }));
+app.use(express.urlencoded({ extended: true, limit: "12mb" }));
 
 if (!process.env.SESSION_SECRET) {
   logger.warn("SESSION_SECRET not set, using default secret. This is not secure!");
