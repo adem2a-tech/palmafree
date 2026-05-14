@@ -10,6 +10,12 @@ globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
+/** Vercel / CI production builds must not bundle pino-pretty (adds ~1 Mo+ au bundle). */
+const isProductionBundle =
+  process.env.NODE_ENV === "production" ||
+  process.env.VERCEL === "1" ||
+  process.env.VERCEL_ENV === "production";
+
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
@@ -101,10 +107,13 @@ async function buildAll() {
       "puppeteer-core",
       "electron",
     ],
-    sourcemap: "linked",
+    minify: isProductionBundle,
+    sourcemap: isProductionBundle ? false : "linked",
     plugins: [
-      // pino relies on workers to handle logging, instead of externalizing it we use a plugin to handle it
-      esbuildPluginPino({ transports: ["pino-pretty"] })
+      // pino-pretty est réservé au dev local ; sur Vercel (NODE_ENV=production) il gonfle inutilement le bundle.
+      esbuildPluginPino({
+        transports: isProductionBundle ? [] : ["pino-pretty"],
+      }),
     ],
     // Make sure packages that are cjs only (e.g. express) but are bundled continue to work in our esm output file
     banner: {
