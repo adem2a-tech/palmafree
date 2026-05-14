@@ -3,7 +3,6 @@
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @workspace/api-server run build",
   "rewrites": [
-    { "handle": "filesystem" },
     { "source": "/(.*)", "destination": "/api" }
   ],
   "functions": {
