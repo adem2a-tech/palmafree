@@ -1,0 +1,215 @@
+Je veux que tu me crées un site web complet moderne et responsive pour un serveur GTA RP nommé AVESTIA FA avec un style sombre futuriste (dark theme) et des couleurs principales violet et blanc, comme une interface gaming premium. Le site doit être très propre, fluide, avec des animations, des cartes (cards), des boutons stylés et un design professionnel.
+
+🔥 Objectif général
+
+Le site sert de plateforme officielle du serveur pour afficher :
+
+les nouveautés (patch notes)
+le lore (univers du serveur)
+les métiers légaux
+l’illégal (organisations illégales)
+l’équipe (staff)
+les réseaux sociaux
+les fonctionnalités du serveur
+un bouton Discord + lien de connexion cfx
+
+Le site doit être inspiré des interfaces GTA RP modernes avec des sections en cards comme sur les images.
+
+📌 STRUCTURE DU SITE
+1) HEADER / NAVBAR (fixe en haut)
+
+Créer une navbar fixe avec :
+
+Logo du serveur (AVESTIA FA) + icône stylée
+Onglets :
+Accueil
+Nouveautés
+Lore
+Métiers
+Illégal
+Équipe
+Réseaux
+Fonctionnalités
+à droite un bouton violet "Discord"
+à droite un bouton "Wiki" (petit bouton ou lien externe)
+
+La navbar doit rester visible quand on scroll (sticky).
+
+2) PAGE ACCUEIL (Hero section)
+
+Créer une page d’accueil très stylée avec :
+
+une grande image de fond floutée (style GTA RP / ville)
+au centre :
+titre énorme "AVESTIA FA"
+sous-titre : "Plongez dans une expérience roleplay immersive et unique. Construisez votre histoire dans une ville vivante où chaque décision compte."
+une box en dessous contenant :
+"Connexion : cfx.re/join/XXXXXX"
+un bouton pour copier le lien
+en dessous 2 boutons :
+"Rejoindre Discord"
+"Découvrir les fonctionnalités"
+
+Ajouter une animation d’apparition (fade + zoom) et un effet de glow violet sur le titre.
+
+3) PAGE NOUVEAUTÉS (Patch Notes)
+
+Créer une page "Nouveautés" contenant :
+
+un titre "Nouveautés"
+une liste de patch notes sous forme de cards avec :
+version (ex : v1.0.4)
+date
+liste des ajouts/corrections
+possibilité de filtrer par catégorie :
+Ajouts
+Corrections
+Optimisation
+
+Design : cards avec bord violet et hover effect.
+
+4) PAGE LORE
+
+Créer une page Lore contenant :
+
+un grand texte d’introduction sur l’univers
+des sections sous forme de cards :
+Histoire de la ville
+Gouvernement & corruption
+Criminalité et gangs
+Forces de l’ordre
+Économie du serveur
+chaque section doit avoir un petit résumé et un bouton "Lire plus"
+5) PAGE MÉTIERS LÉGAUX
+
+Créer une page "Métiers Légaux" identique au style RP :
+
+titre : "Métiers Légaux"
+description en dessous
+un bouton vert "Discord Métiers Légaux" (lien externe)
+un filtre en haut :
+Disponible (vert)
+Indisponible (rouge)
+
+Ensuite afficher des cartes métiers avec :
+
+Nom du métier (ex : Gouvernement, LSPD, BCSO, EMS, LSPD, LSFD etc.)
+Description courte
+Statut (Disponible ou Indisponible)
+Badge de couleur (vert ou rouge)
+un bouton "Rejoindre" si disponible
+sinon un bouton grisé "Indisponible"
+
+Les métiers doivent être classés en catégories :
+
+Entreprises Service Public
+Entreprises Privées
+Métiers Freelance
+6) PAGE ILLÉGAL
+
+Créer une page "Illégal" similaire à métiers mais pour organisations illégales :
+
+Cartes : Cartel, Gang, Mafia, Braquage Crew, etc.
+Chaque carte contient :
+Nom
+Activités principales (trafic, braquage, extorsion…)
+Statut (Disponible/Indisponible)
+Lien Discord de l’organisation si disponible
+
+Ajouter un style plus "danger" avec accents rouge/violet.
+
+7) PAGE ÉQUIPE (Staff)
+
+Créer une page "Équipe" très stylée avec :
+
+titre : "Notre équipe"
+cards par catégorie :
+Fondateur
+Co-Fondateur
+Administration
+Modération
+Développeurs
+Support
+Chaque card staff contient :
+avatar rond
+pseudo
+rôle
+description courte
+badge couleur selon rôle
+Ajouter un effet hover (glow violet + légère rotation)
+8) PAGE RÉSEAUX
+
+Créer une page Réseaux sociaux avec des gros boutons :
+
+Discord
+TikTok
+YouTube
+Instagram
+Twitter/X
+Twitch
+Chaque bouton doit être une card cliquable avec icône + hover.
+9) PAGE FONCTIONNALITÉS
+
+Créer une page Fonctionnalités avec une liste complète de ce que propose le serveur :
+
+Système économique avancé
+Entreprises RP
+Système de craft
+Système de drogue
+Système d’armes
+Système de braquage
+Système de véhicules custom
+Système immobilier
+Système judiciaire
+Téléphone RP
+UI moderne
+Chaque fonctionnalité doit être affichée en cards avec icône.
+10) FOOTER
+
+Créer un footer complet avec :
+
+logo AVESTIA FA
+copyright
+liens rapides (Accueil, Lore, Nouveautés, Discord)
+réseaux sociaux
+⚙️ FONCTIONS IMPORTANTES
+Tout doit être responsive (mobile/tablette/PC)
+Ajouter du smooth scroll entre sections
+Ajouter des animations (fade in, slide)
+Ajouter un système de pages (soit multi-page, soit single page avec sections)
+Ajouter un système de données modifiables facilement (un fichier JSON ou un tableau JS où je peux modifier les patch notes, métiers, staff etc.)
+Le code doit être propre et organisé
+🛠️ TECHNOLOGIE
+
+Je veux que tu fasses ça en :
+
+HTML + CSS + JavaScript (ou React si tu veux mais simple à modifier)
+style moderne type Tailwind ou CSS custom
+pas besoin de base de données, juste des données en JSON local
+🎨 STYLE EXACT
+fond noir / gris très sombre
+contours violets
+boutons violets glow
+police moderne (genre Poppins ou Inter)
+cards arrondies avec ombre
+effet hover sur tous les éléments
+🔗 LIENS À METTRE
+Discord : https://discord.gg/XXXXX
+Connexion CFX : https://cfx.re/join/XXXXX
+Wiki : https://wiki.avestiafa.fr
+✅ IMPORTANT
+
+Je veux que tu génères tout le projet complet avec :
+
+index.html
+style.css
+script.js
+un fichier data.json contenant :
+patch notes
+métiers légaux
+organisations illégales
+équipe staff
+fonctionnalités
+réseaux
+
+Le site doit être prêt à être publié directement.
