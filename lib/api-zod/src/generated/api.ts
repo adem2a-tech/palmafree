@@ -8,9 +8,160 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+});
+
+/**
+ * @summary List all jobs
+ */
+export const ListJobsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  category: zod.string(),
+  available: zod.boolean(),
+  discordLink: zod.string().nullish(),
+});
+export const ListJobsResponse = zod.array(ListJobsResponseItem);
+
+/**
+ * @summary List all illegal organizations
+ */
+export const ListIllegalOrgsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  status: zod.string(),
+  activities: zod.array(zod.string()),
+  discordLink: zod.string().nullish(),
+});
+export const ListIllegalOrgsResponse = zod.array(ListIllegalOrgsResponseItem);
+
+/**
+ * @summary List all staff members
+ */
+export const ListStaffResponseItem = zod.object({
+  id: zod.number(),
+  pseudo: zod.string(),
+  role: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  avatarUrl: zod.string().nullish(),
+  sortOrder: zod.number(),
+});
+export const ListStaffResponse = zod.array(ListStaffResponseItem);
+
+/**
+ * @summary Admin login
+ */
+export const AdminLoginBody = zod.object({
+  username: zod.string(),
+  password: zod.string(),
+});
+
+/**
+ * @summary Get current admin status
+ */
+export const AdminMeResponse = zod.object({
+  loggedIn: zod.boolean(),
+});
+
+/**
+ * @summary Update a job
+ */
+export const UpdateJobParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateJobBody = zod.object({
+  available: zod.boolean().optional(),
+  discordLink: zod.string().nullish(),
+});
+
+export const UpdateJobResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  category: zod.string(),
+  available: zod.boolean(),
+  discordLink: zod.string().nullish(),
+});
+
+/**
+ * @summary Update an illegal organization
+ */
+export const UpdateIllegalOrgParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateIllegalOrgBody = zod.object({
+  status: zod.string().optional(),
+  discordLink: zod.string().nullish(),
+});
+
+export const UpdateIllegalOrgResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  status: zod.string(),
+  activities: zod.array(zod.string()),
+  discordLink: zod.string().nullish(),
+});
+
+/**
+ * @summary List all staff members (admin)
+ */
+export const AdminListStaffResponseItem = zod.object({
+  id: zod.number(),
+  pseudo: zod.string(),
+  role: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  avatarUrl: zod.string().nullish(),
+  sortOrder: zod.number(),
+});
+export const AdminListStaffResponse = zod.array(AdminListStaffResponseItem);
+
+/**
+ * @summary Create a staff member
+ */
+export const CreateStaffBody = zod.object({
+  pseudo: zod.string(),
+  role: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  avatarUrl: zod.string().nullish(),
+  sortOrder: zod.number().optional(),
+});
+
+/**
+ * @summary Update a staff member
+ */
+export const UpdateStaffParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateStaffBody = zod.object({
+  pseudo: zod.string().optional(),
+  role: zod.string().optional(),
+  description: zod.string().optional(),
+  category: zod.string().optional(),
+  avatarUrl: zod.string().nullish(),
+  sortOrder: zod.number().optional(),
+});
+
+export const UpdateStaffResponse = zod.object({
+  id: zod.number(),
+  pseudo: zod.string(),
+  role: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  avatarUrl: zod.string().nullish(),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a staff member
+ */
+export const DeleteStaffParams = zod.object({
+  id: zod.coerce.number(),
 });

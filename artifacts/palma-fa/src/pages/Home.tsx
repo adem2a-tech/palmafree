@@ -4,8 +4,10 @@ import { Copy, Check, ChevronRight, Play, Server, Skull, Users, Shield, MapPin, 
 import { SiDiscord, SiTiktok, SiYoutube, SiInstagram, SiX, SiTwitch } from "react-icons/si";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { PATCH_NOTES, LORE, JOBS, ILLEGAL, STAFF, FEATURES } from "@/data";
+import { PATCH_NOTES, LORE, FEATURES } from "@/data";
 import { useToast } from "@/hooks/use-toast";
+import { useListJobs, useListIllegalOrgs, useListStaff } from "@workspace/api-client-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const iconMap: Record<string, React.ReactNode> = {
   DollarSign: <DollarSign className="text-primary w-8 h-8" />,
@@ -31,6 +33,10 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [activePatchFilter, setActivePatchFilter] = useState<string>("Tous");
 
+  const { data: jobs, isLoading: isJobsLoading } = useListJobs();
+  const { data: illegalOrgs, isLoading: isIllegalLoading } = useListIllegalOrgs();
+  const { data: staff, isLoading: isStaffLoading } = useListStaff();
+
   const handleCopyIP = () => {
     navigator.clipboard.writeText("cfx.re/join/palmafa");
     setCopied(true);
@@ -47,17 +53,20 @@ export default function Home() {
 
   const patchCategories = ["Tous", ...Array.from(new Set(PATCH_NOTES.map(p => p.category)))];
 
-  const groupedJobs = JOBS.reduce((acc, job) => {
-    if (!acc[job.category]) acc[job.category] = [];
-    acc[job.category].push(job);
-    return acc;
-  }, {} as Record<string, typeof JOBS>);
+  type Job = NonNullable<typeof jobs>[number];
+  type StaffMember = NonNullable<typeof staff>[number];
 
-  const groupedStaff = STAFF.reduce((acc, member) => {
-    if (!acc[member.category]) acc[member.category] = [];
-    acc[member.category].push(member);
+  const groupedJobs = (jobs ?? []).reduce<Record<string, Job[]>>((acc, job) => {
+    if (!acc[job.category]) acc[job.category] = [];
+    acc[job.category]!.push(job);
     return acc;
-  }, {} as Record<string, typeof STAFF>);
+  }, {});
+
+  const groupedStaff = (staff ?? []).reduce<Record<string, StaffMember[]>>((acc, member) => {
+    if (!acc[member.category]) acc[member.category] = [];
+    acc[member.category]!.push(member);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
@@ -254,35 +263,53 @@ export default function Home() {
               </div>
 
               <div className="space-y-16">
-                {Object.entries(groupedJobs).map(([category, jobs], idx) => (
-                  <div key={category}>
-                    <h3 className="text-2xl font-bold mb-6 text-foreground/80 border-b border-border pb-4">{category}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {jobs.map((job, i) => (
-                        <div key={i} className="p-5 rounded-xl bg-card border border-border flex flex-col items-start justify-between min-h-[140px]">
-                          <div className="w-full flex justify-between items-start mb-4">
-                            <h4 className="text-lg font-bold">{job.name}</h4>
-                            <span className={`text-xs font-bold px-2 py-1 rounded-md ${
-                              job.status === "Disponible" ? "bg-secondary/10 text-secondary" : "bg-destructive/10 text-destructive"
-                            }`}>
-                              {job.status}
-                            </span>
-                          </div>
-                          <button 
-                            className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                              job.status === "Disponible" 
-                                ? "bg-primary/10 text-primary hover:bg-primary/20" 
-                                : "bg-muted text-muted-foreground cursor-not-allowed"
-                            }`}
-                            disabled={job.status !== "Disponible"}
-                          >
-                            Rejoindre
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                {isJobsLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[140px] rounded-xl" />)}
                   </div>
-                ))}
+                ) : (
+                  Object.entries(groupedJobs!).map(([category, categoryJobs], idx) => (
+                    <div key={category}>
+                      <h3 className="text-2xl font-bold mb-6 text-foreground/80 border-b border-border pb-4">{category}</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {categoryJobs.map((job, i) => (
+                          <div key={i} className="p-5 rounded-xl bg-card border border-border flex flex-col items-start justify-between min-h-[140px]">
+                            <div className="w-full flex justify-between items-start mb-4">
+                              <h4 className="text-lg font-bold">{job.name}</h4>
+                              <span className={`text-xs font-bold px-2 py-1 rounded-md ${
+                                job.available ? "bg-secondary/10 text-secondary" : "bg-destructive/10 text-destructive"
+                              }`}>
+                                {job.available ? "Disponible" : "Indisponible"}
+                              </span>
+                            </div>
+                            <div className="flex w-full gap-2 mt-auto">
+                              <button 
+                                className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-colors ${
+                                  job.available 
+                                    ? "bg-primary/10 text-primary hover:bg-primary/20" 
+                                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                                }`}
+                                disabled={!job.available}
+                              >
+                                Rejoindre
+                              </button>
+                              {job.discordLink && (
+                                <a 
+                                  href={job.discordLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center w-10 bg-[#5865F2]/10 text-[#5865F2] hover:bg-[#5865F2]/20 rounded-lg transition-colors"
+                                >
+                                  <SiDiscord size={18} />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </motion.div>
           </div>
@@ -299,31 +326,42 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {ILLEGAL.map((org, i) => (
-                  <motion.div 
-                    key={i}
-                    whileHover={{ scale: 1.02 }}
-                    className="p-6 rounded-2xl bg-card/80 backdrop-blur border border-destructive/20 hover:border-destructive/50 transition-all shadow-[0_0_0_rgba(220,38,38,0)] hover:shadow-[0_0_20px_rgba(220,38,38,0.1)] relative overflow-hidden group"
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/10 rounded-bl-full -mr-10 -mt-10 group-hover:scale-110 transition-transform"></div>
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                      <h3 className="text-2xl font-black text-foreground">{org.name}</h3>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        org.status === "Recrute" ? "bg-secondary/20 text-secondary" : "bg-muted text-muted-foreground"
-                      }`}>
-                        {org.status}
-                      </span>
-                    </div>
-                    <div className="space-y-2 relative z-10">
-                      {org.activities.map((act, j) => (
-                        <div key={j} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <div className="w-1.5 h-1.5 rounded-full bg-destructive/50"></div>
-                          {act}
+                {isIllegalLoading ? (
+                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-[200px] rounded-2xl" />)
+                ) : (
+                  illegalOrgs?.map((org, i) => (
+                    <motion.div 
+                      key={i}
+                      whileHover={{ scale: 1.02 }}
+                      className="p-6 rounded-2xl bg-card/80 backdrop-blur border border-destructive/20 hover:border-destructive/50 transition-all shadow-[0_0_0_rgba(220,38,38,0)] hover:shadow-[0_0_20px_rgba(220,38,38,0.1)] relative overflow-hidden group"
+                    >
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/10 rounded-bl-full -mr-10 -mt-10 group-hover:scale-110 transition-transform"></div>
+                      <div className="flex justify-between items-start mb-6 relative z-10">
+                        <h3 className="text-2xl font-black text-foreground">{org.name}</h3>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                            org.status === "Recrute" ? "bg-secondary/20 text-secondary" : "bg-muted text-muted-foreground"
+                          }`}>
+                            {org.status}
+                          </span>
+                          {org.discordLink && (
+                            <a href={org.discordLink} target="_blank" rel="noopener noreferrer" className="text-[#5865F2] bg-[#5865F2]/10 p-1.5 rounded-md hover:bg-[#5865F2]/20">
+                              <SiDiscord size={14} />
+                            </a>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
+                      </div>
+                      <div className="space-y-2 relative z-10">
+                        {org.activities.map((act, j) => (
+                          <div key={j} className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="w-1.5 h-1.5 rounded-full bg-destructive/50"></div>
+                            {act}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))
+                )}
               </div>
             </motion.div>
           </div>
@@ -339,16 +377,24 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {STAFF.map((member, i) => (
-                  <div key={i} className="p-6 rounded-2xl bg-card border border-border text-center flex flex-col items-center group hover:border-primary/30 transition-all">
-                    <div className="w-24 h-24 rounded-full bg-muted mb-4 overflow-hidden border-2 border-transparent group-hover:border-primary transition-all flex items-center justify-center">
-                      <Users size={40} className="text-muted-foreground" />
+                {isStaffLoading ? (
+                  [...Array(4)].map((_, i) => <Skeleton key={i} className="h-[240px] rounded-2xl" />)
+                ) : (
+                  staff?.map((member, i) => (
+                    <div key={i} className="p-6 rounded-2xl bg-card border border-border text-center flex flex-col items-center group hover:border-primary/30 transition-all">
+                      <div className="w-24 h-24 rounded-full bg-muted mb-4 overflow-hidden border-2 border-transparent group-hover:border-primary transition-all flex items-center justify-center">
+                        {member.avatarUrl ? (
+                          <img src={member.avatarUrl} alt={member.pseudo} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl font-bold text-muted-foreground">{member.pseudo.substring(0, 2).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold mb-1">{member.pseudo}</h3>
+                      <span className="text-primary font-medium text-sm mb-3">{member.role}</span>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{member.description}</p>
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{member.pseudo}</h3>
-                    <span className="text-primary font-medium text-sm mb-3">{member.role}</span>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{member.description}</p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </motion.div>
           </div>

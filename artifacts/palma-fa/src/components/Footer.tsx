@@ -39,6 +39,7 @@ export function Footer() {
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Mentions Légales</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Conditions d'utilisation</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Boutique</a></li>
+              <li><a href="/admin" className="text-muted-foreground/30 hover:text-primary transition-colors text-xs">Admin</a></li>
             </ul>
           </div>
         </div>

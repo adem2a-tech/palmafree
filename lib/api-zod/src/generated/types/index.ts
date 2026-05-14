@@ -6,4 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./adminLoginInput";
+export * from "./adminMe";
 export * from "./healthStatus";
+export * from "./illegalOrg";
+export * from "./illegalOrgUpdate";
+export * from "./job";
+export * from "./jobUpdate";
+export * from "./staff";
+export * from "./staffInput";
+export * from "./staffUpdate";

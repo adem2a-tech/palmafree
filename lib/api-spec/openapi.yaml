@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,13 +9,20 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Jobs operations
+  - name: illegal
+    description: Illegal organizations operations
+  - name: staff
+    description: Staff members operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,315 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List all jobs
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /illegal:
+    get:
+      operationId: listIllegalOrgs
+      tags: [illegal]
+      summary: List all illegal organizations
+      responses:
+        "200":
+          description: List of illegal organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IllegalOrg"
+
+  /staff:
+    get:
+      operationId: listStaff
+      tags: [staff]
+      summary: List all staff members
+      responses:
+        "200":
+          description: List of staff members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Staff"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Logged in
+        "401":
+          description: Unauthorized
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "204":
+          description: Logged out
+
+  /admin/me:
+    get:
+      operationId: adminMe
+      tags: [admin]
+      summary: Get current admin status
+      responses:
+        "200":
+          description: Current admin status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMe"
+
+  /admin/jobs/{id}:
+    patch:
+      operationId: updateJob
+      tags: [admin]
+      summary: Update a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Job not found
+
+  /admin/illegal/{id}:
+    patch:
+      operationId: updateIllegalOrg
+      tags: [admin]
+      summary: Update an illegal organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IllegalOrgUpdate"
+      responses:
+        "200":
+          description: Updated illegal organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IllegalOrg"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Illegal organization not found
+
+  /admin/staff:
+    get:
+      operationId: adminListStaff
+      tags: [admin]
+      summary: List all staff members (admin)
+      responses:
+        "200":
+          description: List of staff members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Staff"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createStaff
+      tags: [admin]
+      summary: Create a staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffInput"
+      responses:
+        "201":
+          description: Created staff member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Staff"
+        "401":
+          description: Unauthorized
+
+  /admin/staff/{id}:
+    patch:
+      operationId: updateStaff
+      tags: [admin]
+      summary: Update a staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffUpdate"
+      responses:
+        "200":
+          description: Updated staff member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Staff"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Staff member not found
+    delete:
+      operationId: deleteStaff
+      tags: [admin]
+      summary: Delete a staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Staff member not found
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
 
+    Job:
+      type: object
+      required: [id, name, category, available]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        available: { type: boolean }
+        discordLink: { type: ["string", "null"] }
+
+    JobUpdate:
+      type: object
+      properties:
+        available: { type: boolean }
+        discordLink: { type: ["string", "null"] }
+
+    IllegalOrg:
+      type: object
+      required: [id, name, status, activities]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+        activities:
+          type: array
+          items: { type: string }
+        discordLink: { type: ["string", "null"] }
+
+    IllegalOrgUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        discordLink: { type: ["string", "null"] }
+
+    Staff:
+      type: object
+      required: [id, pseudo, role, description, category, sortOrder]
+      properties:
+        id: { type: integer }
+        pseudo: { type: string }
+        role: { type: string }
+        description: { type: string }
+        category: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+
+    StaffInput:
+      type: object
+      required: [pseudo, role, description, category]
+      properties:
+        pseudo: { type: string }
+        role: { type: string }
+        description: { type: string }
+        category: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+
+    StaffUpdate:
+      type: object
+      properties:
+        pseudo: { type: string }
+        role: { type: string }
+        description: { type: string }
+        category: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+
+    AdminLoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+
+    AdminMe:
+      type: object
+      required: [loggedIn]
+      properties:
+        loggedIn: { type: boolean }

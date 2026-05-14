@@ -8,3 +8,73 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Job {
+  id: number;
+  name: string;
+  category: string;
+  available: boolean;
+  /** @nullable */
+  discordLink?: string | null;
+}
+
+export interface JobUpdate {
+  available?: boolean;
+  /** @nullable */
+  discordLink?: string | null;
+}
+
+export interface IllegalOrg {
+  id: number;
+  name: string;
+  status: string;
+  activities: string[];
+  /** @nullable */
+  discordLink?: string | null;
+}
+
+export interface IllegalOrgUpdate {
+  status?: string;
+  /** @nullable */
+  discordLink?: string | null;
+}
+
+export interface Staff {
+  id: number;
+  pseudo: string;
+  role: string;
+  description: string;
+  category: string;
+  /** @nullable */
+  avatarUrl?: string | null;
+  sortOrder: number;
+}
+
+export interface StaffInput {
+  pseudo: string;
+  role: string;
+  description: string;
+  category: string;
+  /** @nullable */
+  avatarUrl?: string | null;
+  sortOrder?: number;
+}
+
+export interface StaffUpdate {
+  pseudo?: string;
+  role?: string;
+  description?: string;
+  category?: string;
+  /** @nullable */
+  avatarUrl?: string | null;
+  sortOrder?: number;
+}
+
+export interface AdminLoginInput {
+  username: string;
+  password: string;
+}
+
+export interface AdminMe {
+  loggedIn: boolean;
+}
