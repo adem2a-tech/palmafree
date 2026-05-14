@@ -13,6 +13,9 @@ const pgSession = connectPgSimple(session);
 
 const app: Express = express();
 
+/** Sur Vercel : pas de store Postgres (CREATE TABLE / pool → erreurs fréquentes en serverless). */
+const usePostgresSessionStore = process.env.VERCEL !== "1";
+
 /** Requis derrière le proxy TLS de Vercel (cookies `secure`, IP réelle). */
 app.set("trust proxy", 1);
 
@@ -49,17 +52,22 @@ if (!process.env.SESSION_SECRET) {
 
 app.use(
   session({
-    store: new pgSession({
-      pool,
-      tableName: "session",
-      createTableIfMissing: true,
-    }),
+    ...(usePostgresSessionStore
+      ? {
+          store: new pgSession({
+            pool,
+            tableName: "session",
+            createTableIfMissing: true,
+          }),
+        }
+      : {}),
     secret: process.env.SESSION_SECRET || "palma-fa-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      secure: process.env.NODE_ENV === "production",
+      secure:
+        process.env.NODE_ENV === "production" || process.env.VERCEL === "1",
       httpOnly: true,
       sameSite: "lax",
     },
