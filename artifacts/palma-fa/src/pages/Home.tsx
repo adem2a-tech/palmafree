@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
 import { Copy, Check, ChevronRight, Play, Server, Skull, Users, Shield, MapPin, DollarSign, Briefcase, Hammer, Pill, Crosshair, Vault, Car, Home as HomeIcon, Scale, Smartphone, Monitor } from "lucide-react";
 import { SiDiscord, SiTiktok, SiYoutube, SiInstagram, SiX, SiTwitch } from "react-icons/si";
@@ -28,10 +29,26 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
+const SLIDES = [
+  "/slide1.png",
+  "/slide2.png",
+  "/slide3.png",
+  "/slide4.png",
+  "/slide5.png",
+];
+
 export default function Home() {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [activePatchFilter, setActivePatchFilter] = useState<string>("Tous");
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % SLIDES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: jobs, isLoading: isJobsLoading } = useListJobs();
   const { data: illegalOrgs, isLoading: isIllegalLoading } = useListIllegalOrgs();
@@ -74,35 +91,62 @@ export default function Home() {
 
       <main className="flex-1">
         {/* HERO SECTION */}
-        <section id="home" className="relative min-h-[100dvh] flex items-center justify-center pt-20 overflow-hidden">
-          {/* Background layers */}
+        <section id="home" className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-black">
+          {/* Sliding background images */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-background"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(74,222,128,0.08),transparent)]"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(253,224,71,0.05),transparent)]"></div>
+            <AnimatePresence mode="sync">
+              <motion.div
+                key={slideIndex}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              >
+                <img
+                  src={SLIDES[slideIndex]}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            </AnimatePresence>
+            {/* Dark overlay for readability */}
+            <div className="absolute inset-0 bg-black/60 z-10"></div>
+            {/* Bottom fade to site background */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent z-10"></div>
           </div>
 
-          <div className="container relative z-10 mx-auto px-4 md:px-6 flex flex-col items-center text-center">
+          {/* Slide indicators */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideIndex(i)}
+                className={`h-1 rounded-full transition-all duration-500 ${i === slideIndex ? "w-8 bg-primary" : "w-2 bg-white/30"}`}
+              />
+            ))}
+          </div>
+
+          <div className="container relative z-20 mx-auto px-4 md:px-6 flex flex-col items-center text-center">
             {/* Small floating logo icon */}
             <motion.img
               src="/palmier.png"
               alt="Palmier Palma FA"
-              className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(74,222,128,0.6)] mb-4"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_20px_rgba(74,222,128,0.8)] mb-5"
               initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
-              transition={{ opacity: { duration: 0.6 }, scale: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.6 } }}
+              animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+              transition={{ opacity: { duration: 0.8 }, scale: { duration: 0.8 }, y: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 } }}
             />
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
               className="relative mb-4"
             >
-              <div className="absolute -inset-8 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight">
-                <span className="text-white">PALMA </span>
-                <span className="text-primary drop-shadow-[0_0_20px_rgba(253,224,71,0.6)]">FA</span>
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-widest drop-shadow-[0_4px_32px_rgba(0,0,0,0.8)]">
+                <span className="text-white">PALMA</span>
+                <span className="text-primary drop-shadow-[0_0_30px_rgba(253,224,71,0.7)]"> FA</span>
               </h1>
             </motion.div>
 
