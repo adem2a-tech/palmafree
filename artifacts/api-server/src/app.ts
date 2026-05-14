@@ -13,8 +13,8 @@ const pgSession = connectPgSimple(session);
 
 const app: Express = express();
 
-/** Sur Vercel : pas de store Postgres (CREATE TABLE / pool → erreurs fréquentes en serverless). */
-const usePostgresSessionStore = process.env.VERCEL !== "1";
+/** Sur Vercel : `VERCEL` n’est pas toujours la chaîne `"1"` ; `VERCEL_ENV` est toujours défini en déploiement. */
+const usePostgresSessionStore = !process.env.VERCEL_ENV;
 
 /** Requis derrière le proxy TLS de Vercel (cookies `secure`, IP réelle). */
 app.set("trust proxy", 1);
@@ -67,7 +67,8 @@ app.use(
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       secure:
-        process.env.NODE_ENV === "production" || process.env.VERCEL === "1",
+        process.env.NODE_ENV === "production" ||
+        Boolean(process.env.VERCEL_ENV),
       httpOnly: true,
       sameSite: "lax",
     },
@@ -75,5 +76,25 @@ app.use(
 );
 
 app.use("/api", router);
+
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    logger.error({ err }, "express_error_handler");
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "InternalServerError",
+        message:
+          process.env.VERCEL_ENV
+            ? "Une erreur est survenue (voir logs Vercel)."
+            : String((err as Error)?.message ?? err),
+      });
+    }
+  },
+);
 
 export default app;
