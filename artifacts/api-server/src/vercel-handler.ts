@@ -23,7 +23,7 @@ try {
       "DATABASE_URL n'est pas définie. Vercel → Project → Settings → Environment Variables.",
     );
   } else {
-    app = (await import("./app")).default;
+    app = (await import("./app.js")).default;
   }
 } catch (err) {
   console.error("[vercel-handler] échec chargement ./app", err);

@@ -4,7 +4,8 @@ import cors from "cors";
 import { pinoHttp } from "pino-http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import router from "./routes";
+/** Chemin fichier explicite : Node ESM sur Vercel rejette `import "./routes"` (répertoire sans index résolu). */
+import router from "./routes/index.js";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 
