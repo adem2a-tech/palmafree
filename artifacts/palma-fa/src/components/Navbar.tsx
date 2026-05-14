@@ -46,13 +46,15 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <a href="#home" onClick={(e) => handleScrollTo(e, "#home")} className="flex items-center gap-3 group">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(253,224,71,0.5)] transition-all">
-              <path d="M12 22C12 22 11 16 11 12C11 8 13 4 13 4C13 4 10.5 7 10.5 10C10.5 13 12 18 12 22Z" fill="currentColor" />
-              <path d="M12 12C14 10 17 8 19 8C19 8 16 11 14 13C12.5 14.5 12 12 12 12Z" fill="var(--color-secondary)" />
-              <path d="M12 12C10 10 7 8 5 8C5 8 8 11 10 13C11.5 14.5 12 12 12 12Z" fill="var(--color-secondary)" />
-              <path d="M12 10C15 7 18 4 21 4C21 4 17 7 14 10C12.5 11.5 12 10 12 10Z" fill="var(--color-secondary)" />
-              <path d="M12 10C9 7 6 4 3 4C3 4 7 7 10 10C11.5 11.5 12 10 12 10Z" fill="var(--color-secondary)" />
-            </svg>
+            <motion.img
+              src="/palmier.png"
+              alt="Palma FA logo"
+              width={48}
+              height={48}
+              className="object-contain drop-shadow-[0_0_8px_rgba(74,222,128,0.4)] group-hover:drop-shadow-[0_0_14px_rgba(74,222,128,0.7)] transition-all"
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            />
             <span className="font-sans font-bold text-2xl tracking-wide text-foreground">PALMA <span className="text-primary">FA</span></span>
           </a>
 
