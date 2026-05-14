@@ -65,83 +65,93 @@ export default function Home() {
 
       <main className="flex-1">
         {/* HERO SECTION */}
-        <section id="home" className="relative min-h-[100dvh] flex items-center justify-center pt-20">
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
-            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]"></div>
+        <section id="home" className="relative min-h-[100dvh] flex items-center justify-center pt-20 overflow-hidden">
+          {/* Background layers */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-background"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(74,222,128,0.08),transparent)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(253,224,71,0.05),transparent)]"></div>
           </div>
-          
+
           <div className="container relative z-10 mx-auto px-4 md:px-6 flex flex-col items-center text-center">
+            {/* Small floating logo icon */}
             <motion.img
               src="/palmier.png"
               alt="Palmier Palma FA"
-              className="w-48 md:w-64 lg:w-72 object-contain drop-shadow-[0_0_40px_rgba(74,222,128,0.5)] mb-2"
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: [0, -14, 0] }}
-              transition={{ opacity: { duration: 0.8 }, y: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 } }}
+              className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(74,222,128,0.6)] mb-4"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+              transition={{ opacity: { duration: 0.6 }, scale: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.6 } }}
             />
+
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="mb-6 relative"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="relative mb-4"
             >
-              <div className="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full"></div>
-              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-primary/80 to-primary drop-shadow-[0_0_15px_rgba(253,224,71,0.5)]">
-                PALMA FA
+              <div className="absolute -inset-8 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight">
+                <span className="text-white">PALMA </span>
+                <span className="text-primary drop-shadow-[0_0_20px_rgba(253,224,71,0.6)]">FA</span>
               </h1>
             </motion.div>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl md:text-2xl text-muted-foreground max-w-2xl mb-10 font-medium"
+              transition={{ duration: 0.6, delay: 0.25 }}
+              className="text-base md:text-lg text-muted-foreground max-w-xl mb-8"
             >
-              Bienvenue sous les tropiques. Bâtissez votre empire, respectez la loi ou choisissez l'ombre. Votre histoire commence ici.
+              Plongez dans une expérience roleplay immersive et unique. Construisez votre histoire dans une ville vivante où chaque décision compte.
             </motion.p>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+            {/* CFX connection box */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center gap-4 mb-16"
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="mb-6"
             >
-              <button 
+              <button
                 onClick={handleCopyIP}
-                className="group flex items-center gap-3 px-6 py-4 rounded-xl bg-card border border-primary/20 hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(253,224,71,0.15)]"
+                data-testid="button-copy-ip"
+                className="group flex items-center gap-3 px-5 py-3 rounded-lg bg-black/50 border border-white/10 hover:border-primary/40 transition-all hover:shadow-[0_0_20px_rgba(253,224,71,0.1)]"
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
-                  <Play size={20} className="ml-1" />
-                </div>
-                <div className="flex flex-col items-start">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">IP Serveur</span>
-                  <span className="text-foreground font-mono font-bold tracking-tight">cfx.re/join/palmafa</span>
-                </div>
-                <div className="ml-4 pl-4 border-l border-border text-muted-foreground group-hover:text-primary transition-colors">
-                  {copied ? <Check size={20} /> : <Copy size={20} />}
+                <span className="text-muted-foreground text-sm font-medium">Connexion :</span>
+                <span className="text-foreground font-mono font-semibold text-sm">cfx.re/join/palmafa</span>
+                <div className="ml-2 text-muted-foreground group-hover:text-primary transition-colors">
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
                 </div>
               </button>
+            </motion.div>
 
-              <div className="flex items-center gap-4">
-                <a 
-                  href="https://discord.gg/palmafa"
-                  className="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg hover:shadow-[0_0_30px_rgba(253,224,71,0.4)] transition-all transform hover:-translate-y-1 flex items-center gap-2"
-                >
-                  <SiDiscord size={24} />
-                  Rejoindre Discord
-                </a>
-                <a 
-                  href="#features"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="px-6 py-4 rounded-xl bg-secondary/10 text-secondary font-bold text-lg hover:bg-secondary/20 transition-all"
-                >
-                  Fonctionnalités
-                </a>
-              </div>
+            {/* CTA buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex flex-col sm:flex-row items-center gap-4"
+            >
+              <a
+                href="https://discord.gg/palmafa"
+                data-testid="link-discord-hero"
+                className="flex items-center gap-2 px-7 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-base hover:shadow-[0_0_25px_rgba(253,224,71,0.4)] transition-all transform hover:-translate-y-0.5"
+              >
+                <SiDiscord size={20} />
+                Rejoindre Discord
+              </a>
+              <a
+                href="#features"
+                data-testid="link-features-hero"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="px-7 py-3 rounded-lg border border-white/15 text-foreground font-bold text-base hover:border-primary/40 hover:text-primary transition-all"
+              >
+                Découvrir les fonctionnalités
+              </a>
             </motion.div>
           </div>
         </section>
