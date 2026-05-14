@@ -12,6 +12,9 @@ const pgSession = connectPgSimple(session);
 
 const app: Express = express();
 
+/** Requis derrière le proxy TLS de Vercel (cookies `secure`, IP réelle). */
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
